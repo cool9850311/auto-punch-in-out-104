@@ -76,3 +76,13 @@
    Save and exit.
 
    If you don't know how to use VIM, check out this [Tutorial](https://opensource.com/article/19/3/getting-started-vim).
+
+9. Replace code in the `start.js` file:
+   from:
+   ```javascript
+   const browser = await puppeteer.launch({ headless: false });
+   ```
+   to:
+   ```javascript
+   const browser = await puppeteer.launch({ headless: 'new' });
+   ```
