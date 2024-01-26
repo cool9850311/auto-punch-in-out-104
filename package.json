@@ -1,0 +1,15 @@
+{
+  "name": "auto-punch-in-out-104",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "harryshih",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^21.9.0"
+  }
+}
