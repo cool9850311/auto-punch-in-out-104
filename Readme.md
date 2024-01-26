@@ -59,7 +59,7 @@
 
 7. Check if your punch card is correct.
 
-8. Add cronjobs to punch in/out:
+8. Add cronjobs to punch in/out:  
    Run:
 
    ```sh
@@ -77,7 +77,7 @@
 
    If you don't know how to use VIM, check out this [Tutorial](https://opensource.com/article/19/3/getting-started-vim).
 
-9. Replace code in the `start.js` file:
+9. Replace code in the `start.js` file:  
    from:
    ```javascript
    const browser = await puppeteer.launch({ headless: false });
