@@ -64,13 +64,10 @@ function delay(time) {
   await page.goto('https://pro.104.com.tw/psc2');
   // companyName
   await page.waitForSelector('#companyName', { timeout });
-  const punchElements = await page.$x(
+  const [punchElement] = await page.$x(
     "//span[@class='btn btn-lg btn-block'][contains(., '打卡')]"
   );
-  for (const punchElement of punchElements) {
-    await punchElement.evaluate((b) => b.click());
-    await delay(3000);
-  }
+  await punchElement.evaluate((b) => b.click());
 
   log('打卡成功！');
 
