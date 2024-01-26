@@ -13,7 +13,7 @@
 1. Clone the repository:
 
    ```sh
-   git clone <repository-url>
+   git clone https://github.com/cool9850311/auto-punch-in-out-104.git
    ```
 
 2. Replace the following constants with your own user name and password in the `start.js` file:
