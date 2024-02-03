@@ -10,6 +10,8 @@
   "author": "harryshih",
   "license": "ISC",
   "dependencies": {
+    "moment": "^2.30.1",
+    "node-ical": "^0.17.2",
     "puppeteer": "^21.9.0"
   }
 }

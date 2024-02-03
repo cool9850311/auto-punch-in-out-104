@@ -73,6 +73,13 @@
    5 18 * * 1-5 /bin/bash path-to-bash-file/cron.bash
    ```
 
+   if you have .ics file in the project directory(make sure the holiday calender's data is correct), Edit the file:
+
+   ```sh
+   0 9 * * * /bin/bash path-to-bash-file/cron.bash
+   5 18 * * * /bin/bash path-to-bash-file/cron.bash
+   ```
+
    Save and exit.
 
    If you don't know how to use VIM, check out this [Tutorial](https://opensource.com/article/19/3/getting-started-vim).

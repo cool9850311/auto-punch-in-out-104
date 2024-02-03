@@ -1,5 +1,8 @@
 const puppeteer = require('puppeteer');
+const moment = require('moment');
+const ical = require('node-ical');
 const fs = require('fs');
+const path = require('path');
 const userName = 'YOUR_USERNAME';
 const password = 'YOUR_PASSWORD';
 const timeout = 10000;
@@ -13,7 +16,66 @@ function delay(time) {
     setTimeout(resolve, time);
   });
 }
+async function executeToday() {
+  const fsPromise = require('fs').promises;
+  let icsFileName;
+  try {
+    const files = await fsPromise.readdir(__dirname); // 使用 await 等待 readdir 结果
+    // 檢查每個檔案是否以 .ics 副檔名結尾
+    const icsFiles = files.filter(
+      (file) => path.extname(file).toLowerCase() === '.ics'
+    );
+
+    if (icsFiles.length === 1) {
+      icsFileName = icsFiles[0];
+    }
+  } catch (err) {
+    log('Error reading folder:', err);
+  }
+
+  if (!icsFileName) {
+    return true;
+  }
+
+  const holiday = ical.sync.parseFile(icsFileName);
+  const today = moment().format('YYYY-MM-DD');
+  for (const day of Object.values(holiday)) {
+    if (day?.summary === undefined || day?.start === undefined) {
+      continue;
+    }
+    if (
+      day.summary.includes('補班') &&
+      moment(day.start).isSame(today, 'day')
+    ) {
+      return true;
+    }
+  }
+  for (const day of Object.values(holiday)) {
+    if (day?.summary === undefined || day?.start === undefined) {
+      continue;
+    }
+    if (moment(day.start).isSame(today, 'day')) {
+      return false;
+    }
+    if (day.rrule) {
+      const rruleDates = day.rrule.between(
+        day.start,
+        moment().add(1, 'year').toDate()
+      );
+      for (const rruleDate of rruleDates) {
+        if (moment(rruleDate).isSame(today, 'day')) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
 (async () => {
+  if (!(await executeToday())) {
+    log('Happy Holiday~');
+    return;
+  }
   log('cronjob started');
   const browser = await puppeteer.launch({ headless: false }); // 啟動 headless 瀏覽器
   const page = await browser.newPage(); // 打開一個新分頁
