@@ -40,8 +40,6 @@ function delay(time) {
   const userNameElement = await page.$('[data-qa-id="loginUserName"]');
   const passwordElement = await page.$('[data-qa-id="loginPassword"]');
   const loginButtonElement = await page.$('[data-qa-id="loginButton"]');
-
-  // 在找到元素後，你可以進行相應的操作，例如輸入值
   await userNameElement.type(userName);
   await passwordElement.type(password);
   await page.click('label.Login__checkboxStyle');
@@ -60,18 +58,16 @@ function delay(time) {
   });
   await delay(3000);
   log('登入成功！');
-  // https://pro.104.com.tw/psc2
   await page.goto('https://pro.104.com.tw/psc2');
-  // companyName
   await page.waitForSelector('#companyName', { timeout });
   const [punchElement] = await page.$x(
     "//span[@class='btn btn-lg btn-block'][contains(., '打卡')]"
   );
   await punchElement.evaluate((b) => b.click());
-
+  // TODO: Should verify with waitForResponse or element
+  await delay(3000);
+  //
   log('打卡成功！');
 
-  // 在這裡可以進行登入後的操作
-
-  await browser.close(); // 關閉瀏覽器
+  await browser.close();
 })();
