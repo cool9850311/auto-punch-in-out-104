@@ -45,7 +45,7 @@ async function executeToday() {
     }
     if (
       day.summary.includes('補班') &&
-      moment(day.start).isSame(today, 'day')
+      moment().isBetween(moment(day.start), moment(day.end), undefined, '[)')
     ) {
       return true;
     }
@@ -54,7 +54,9 @@ async function executeToday() {
     if (day?.summary === undefined || day?.start === undefined) {
       continue;
     }
-    if (moment(day.start).isSame(today, 'day')) {
+    if (
+      moment().isBetween(moment(day.start), moment(day.end), undefined, '[)')
+    ) {
       return false;
     }
     if (day.rrule) {
