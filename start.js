@@ -6,6 +6,7 @@ const path = require('path');
 const userName = 'YOUR_USERNAME';
 const password = 'YOUR_PASSWORD';
 const timeout = 10000;
+const MAX_RETRIES = 5;
 
 async function log(message) {
   const logPath = './log.txt';
@@ -80,33 +81,18 @@ async function executeToday() {
   return true;
 }
 
-// Main function with proper error handling
-(async () => {
+async function performPunchIn() {
   let browser = null;
   try {
-    log('=== 104 Punch-in Script Started ===');
-    
-    if (!(await executeToday())) {
-      log('Happy Holiday~');
-      return;
-    }
-    
-    log('cronjob started');
-    try {
-      log('Launching browser...');
-      browser = await puppeteer.launch({ 
-        headless: false,
-        executablePath: process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined,
-        args: [],
-        ignoreHTTPSErrors: true,
-        timeout: 60000
-      });
-      log('Browser launched successfully');
-    } catch (browserError) {
-      log(`Error launching browser: ${browserError.message}`);
-      log(`Browser launch error stack: ${browserError.stack}`);
-      throw browserError;
-    }
+    log('Launching browser...');
+    browser = await puppeteer.launch({ 
+      headless: 'new',
+      executablePath: process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined,
+      args: [],
+      ignoreHTTPSErrors: true,
+      timeout: 60000
+    });
+    log('Browser launched successfully');
     
     const page = await browser.newPage(); // 打開一個新分頁
     await page.setUserAgent(
@@ -199,7 +185,7 @@ async function executeToday() {
           await delay(3000);
           log('打卡成功！');
         } else {
-          log('打卡按鈕未找到');
+          throw new Error('打卡按鈕未找到');
         }
       } catch (punchError) {
         log(`打卡错误: ${punchError}`);
@@ -210,10 +196,8 @@ async function executeToday() {
       throw loginError;
     }
   } catch (error) {
-    log(`Error occurred: ${error.message}`);
-    if (error.stack) {
-      log(`Error stack: ${error.stack}`);
-    }
+    log(`Punch-in process error: ${error.message}`);
+    throw error;
   } finally {
     if (browser) {
       try {
@@ -223,6 +207,58 @@ async function executeToday() {
         log(`Error closing browser: ${closeError}`);
       }
     }
+  }
+}
+
+// Main function with proper error handling and retry mechanism
+(async () => {
+  try {
+    log('=== 104 Punch-in Script Started ===');
+    
+    if (!(await executeToday())) {
+      log('Happy Holiday~');
+      return;
+    }
+    
+    log('cronjob started');
+    
+    let success = false;
+    let lastError = null;
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        log(`=== Attempt ${attempt}/${MAX_RETRIES} ===`);
+        await performPunchIn();
+        success = true;
+        log(`=== Punch-in completed successfully on attempt ${attempt} ===`);
+        break;
+      } catch (error) {
+        lastError = error;
+        log(`Attempt ${attempt} failed: ${error.message}`);
+        
+        if (attempt < MAX_RETRIES) {
+          const waitTime = attempt * 5000; // Wait 5s, 10s, 15s between retries
+          log(`Waiting ${waitTime/1000} seconds before retry...`);
+          await delay(waitTime);
+        }
+      }
+    }
+    
+    if (!success) {
+      log(`=== All ${MAX_RETRIES} attempts failed ===`);
+      log(`Final error: ${lastError.message}`);
+      if (lastError.stack) {
+        log(`Final error stack: ${lastError.stack}`);
+      }
+      throw lastError;
+    }
+    
+  } catch (error) {
+    log(`Script execution failed: ${error.message}`);
+    if (error.stack) {
+      log(`Script error stack: ${error.stack}`);
+    }
+    process.exit(1);
   }
 })().catch(error => {
   console.error('Top-level error:', error);
